@@ -1,0 +1,41 @@
+# Obsidian Sync for the vault on deepend, through Obsidian's official headless client.
+# Its own Portainer stack (not part of `apps`) so deploying it never redeploys `apps`.
+# Setup and cutover from the LiveSync stack: README.md.
+services:
+  obsidian-sync:
+    build:
+      context: .
+      args:
+        OBSIDIAN_HEADLESS_VERSION: ${OBSIDIAN_HEADLESS_VERSION:-0.0.14}
+    image: localhost/obsidian-sync:${OBSIDIAN_HEADLESS_VERSION:-0.0.14}
+    container_name: obsidian-sync
+    restart: unless-stopped
+    init: true
+    # The vault's owner on deepend (obsidian 3018:3011), same as the LiveSync bridge,
+    # so files it writes are readable by every other vault client.
+    user: "3018:3011"
+    environment:
+      TZ: America/Los_Angeles
+      SYNC_INTERVAL: ${SYNC_INTERVAL:-60}
+      VAULT_SENTINEL: wiki/Index.md
+      MIN_FILES: "50"
+    volumes:
+      - vault:/vault
+      # Login token, per-vault config (holds the derived E2E key) and the SQLite
+      # state DB. Local SSD, not NFS: SQLite WAL on NFS is asking for trouble.
+      # Must exist, owned 3018:3011, mode 0700, before first deploy (README step 1).
+      - /mnt/ssd/appdata/obsidian/headless:/state
+    # Outbound only (wss to Obsidian's sync servers). No ports, no Traefik route.
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  vault:
+    # Same export the apps stack's `obsidian` volume mounts.
+    driver_opts:
+      type: "nfs"
+      o: "nfsvers=4,addr=deepend,rw,async,nolock"
+      device: ":/mnt/deepend/library/obsidian"
