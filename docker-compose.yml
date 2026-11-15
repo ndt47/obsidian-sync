@@ -34,8 +34,12 @@ services:
 
 volumes:
   vault:
+    # Renamed 2026-11-15 when nconnect was added (Docker will not change a volume's
+    # options in place); the old obsidian-sync_vault definition can be removed.
+    name: obsidian-sync_vault_nc4
     # Same export the apps stack's `obsidian` volume mounts.
     driver_opts:
       type: "nfs"
-      o: "nfsvers=4,addr=deepend,rw,async,nolock"
+      # nconnect is per-server: every NFS volume on freeside carries the same value (2026-11-15).
+      o: "nfsvers=4.2,nconnect=4,addr=deepend,rw,async,nolock"
       device: ":/mnt/deepend/library/obsidian"
