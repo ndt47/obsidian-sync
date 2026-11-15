@@ -15,7 +15,7 @@ It replaces the Self-hosted LiveSync services in the `apps` stack (`obsidian-cou
 
 ## First-time setup
 1. **On freeside (sudo):** `sudo install -d -o 3018 -g 3011 -m 0700 /mnt/ssd/appdata/obsidian/headless`
-2. **Portainer → Stacks → Add stack → Repository:** `https://github.com/ndt47/obsidian-sync`, ref `refs/heads/main`, compose path `docker-compose.yml`, environment `local`. Deploy. Portainer builds the image on freeside. The log should show `not set up yet … waiting`.
+2. **Portainer → Stacks → Add stack → Repository:** `https://github.com/ndt47/obsidian-sync`, ref `refs/heads/main`, compose path `docker-compose.yml`, environment `local`. Deploy. Portainer pulls the image from GHCR (CI builds it; needs the `ghcr.io` registry credential). The log should show `not set up yet … waiting`.
 3. **Hold the old sync:** stop `obsidian-bridge` in Portainer, so only one engine writes the vault during the cutover. Before the first sync, confirm there's a fresh ZFS snapshot of `deepend/library/obsidian` and make a local tarball (see Working with Nathan, *Snapshots*).
 4. **Container console** (Portainer → `obsidian-sync` → Console, `/bin/sh`, or `sudo docker exec -it obsidian-sync sh`):
    ```sh
@@ -36,5 +36,5 @@ It replaces the Self-hosted LiveSync services in the `apps` stack (`obsidian-cou
 
 ## Operations
 - Logs are quiet when nothing changes. Runs that move files print `Upload complete` / `Downloaded` / `Deleting` / `Merg…` lines.
-- To upgrade, bump `OBSIDIAN_HEADLESS_VERSION` in `docker-compose.yml` (it's pinned) and redeploy with *Re-pull and redeploy*.
+- To upgrade, bump `OBSIDIAN_HEADLESS_VERSION` in the `Dockerfile` and push; CI publishes `ghcr.io/ndt47/obsidian-sync:sha-<commit>`. Then pin that tag in `docker-compose.yml`, push, and *Pull and redeploy*.
 - **Never run desktop Obsidian Sync on a copy of this same folder.** Obsidian says to use one sync method per folder.

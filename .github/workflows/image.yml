@@ -11,7 +11,9 @@ name: image
 #
 # GitHub-hosted on purpose: this repo is PUBLIC, so hosted minutes are free, and
 # a self-hosted runner on a public repo would run code from anyone's fork. The
-# package itself is private (GHCR default for a new package).
+# package is PUBLIC too (it took the repo's visibility; checked 2026-11-15). That's
+# fine: the image holds only this repo's public files. The Obsidian login and vault
+# key live in /state on freeside, never in the image.
 
 on:
   push:

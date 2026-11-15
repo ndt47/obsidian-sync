@@ -3,11 +3,11 @@
 # Setup and cutover from the LiveSync stack: README.md.
 services:
   obsidian-sync:
-    build:
-      context: .
-      args:
-        OBSIDIAN_HEADLESS_VERSION: ${OBSIDIAN_HEADLESS_VERSION:-0.0.14}
-    image: localhost/obsidian-sync:${OBSIDIAN_HEADLESS_VERSION:-0.0.14}
+    # Built by CI (.github/workflows/image.yml) on every push to main that touches
+    # Dockerfile or sync-loop.sh, and pinned here to that commit's sha- tag
+    # (obsidian-headless 0.0.14, set in the Dockerfile). Pulled with Portainer's
+    # ghcr.io registry credential (read-only ghcr-pull token).
+    image: ghcr.io/ndt47/obsidian-sync:sha-adc7de4
     container_name: obsidian-sync
     restart: unless-stopped
     init: true
